@@ -1,21 +1,20 @@
 module Main where
 
 import Data.Aeson (decode)
-import Data.Text (Text)
+import Data.UUID (UUID)
+import Data.UUID.V4 (nextRandom)
 import Network.HTTP.Types (status400)
 import OrderTaking.Common.Instances ()
+import OrderTaking.Common.Order (ProductMap)
 import OrderTaking.PlaceOrder.Dto (OrderDto, toUnvalidatedOrder)
 import OrderTaking.PlaceOrder.Instances ()
 import OrderTaking.PlaceOrder.Workflow (placeOrder)
-import Persistence.DB (getProductCode, saveEvents)
+import Persistence.DB (getProductMap, saveEvents)
 import Web.Scotty (
     ActionM,
     body,
-    get,
-    html,
     json,
     liftIO,
-    pathParam,
     post,
     scotty,
     status,
@@ -24,25 +23,34 @@ import Web.Scotty (
 main :: IO ()
 main = scotty 3000
     $ do
-        get "/scotty/:word" $ do
-            beam <- pathParam "word"
-            html $ mconcat ["<h1>Scotty, ", beam, " me up!</h1>"]
+        post "/order" handleOrder
 
-        get "/worf/:word" $ do
-            beam <- pathParam "word"
-            html $ mconcat ["<h1>Worf, ", beam, " me up!</h1>"]
+-- handleOrder :: ActionM ()
+-- handleOrder = do
+--     maybeOrderDto <- decodeOrderDto
+--     flip (maybe malformedRequest) maybeOrderDto $ \orderDto -> do
+--         (productMap, newOrderId) <- getDependencies
+--         let unvalidatedOrder = toUnvalidatedOrder newOrderId orderDto
+--         either code400 (liftIO . saveEvents) (placeOrder productMap unvalidatedOrder)
 
-        post "/order" handlePostOrder
+handleOrder :: ActionM ()
+handleOrder =
+    decodeOrderDto >>= \maybeOrderDto -> flip (maybe malformedRequest) maybeOrderDto $ \orderDto ->
+        getDependencies >>= \(productMap, newOrderId) ->
+            let unvalidatedOrder = toUnvalidatedOrder newOrderId orderDto
+             in either code400 (liftIO . saveEvents) (placeOrder productMap unvalidatedOrder)
 
-handlePostOrder :: ActionM ()
-handlePostOrder = do
-    maybeOrderDto <- decode <$> body :: ActionM (Maybe OrderDto)
-    case maybeOrderDto of
-        Nothing -> status status400 >> json ("Malformed request" :: Text)
-        Just orderDto -> do
-            unvalidatedOrder <- liftIO $ toUnvalidatedOrder orderDto
-            result <- liftIO $ placeOrder getProductCode unvalidatedOrder
-            case result of
-                Left err -> status status400 >> json err
-                Right validatedOrder -> do
-                    liftIO $ saveEvents [validatedOrder]
+code400 :: String -> ActionM ()
+code400 err = status status400 >> json err
+
+malformedRequest :: ActionM ()
+malformedRequest = code400 "Malformed request"
+
+decodeOrderDto :: ActionM (Maybe OrderDto)
+decodeOrderDto = decode <$> body :: ActionM (Maybe OrderDto)
+
+getDependencies :: ActionM (ProductMap, UUID)
+getDependencies = do
+    productMap <- liftIO getProductMap
+    newOrderId <- liftIO nextRandom
+    pure (productMap, newOrderId)

@@ -1,0 +1,4 @@
+{"orderId":"1bc955fc-d531-49b0-a845-f8df12ea7e10","customerId":1,"orderLines":[{"productCode":"CHMA0000289509","productName":"Picard","quantity":5}],"shippingAddress":"Chateau Picard, La Barre"}
+{"orderId":"3455cfec-0280-4f05-9157-e565d6ed21a5","customerId":1,"orderLines":[{"productCode":"CHMA0000123141","productName":"Worf","quantity":5}],"shippingAddress":"Chateau Picard, La Barre"}
+{"orderId":"4084e231-73c6-40fc-94b1-d46ba4a217ac","customerId":1,"orderLines":[{"productCode":"CHMA0000253921","productName":"Elnor","quantity":5}],"shippingAddress":"Chateau Picard, La Barre"}
+{"eventType":"OrderPlaced","eventData":{"orderId":"d9740f9f-acf8-48e9-ac01-8caa30d37d92","customerId":1,"orderLines":[{"productCode":"CHMA0000253921","productName":"Elnor","quantity":5}],"shippingAddress":"Chateau Picard, La Barre"}}

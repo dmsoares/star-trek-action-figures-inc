@@ -1,4 +1,4 @@
-module Persistence.DB (saveEvents, getProductCode) where
+module Persistence.DB (saveEvents, getProductMap) where
 
 import Data.Aeson (
     ToJSON (toEncoding),
@@ -7,8 +7,8 @@ import Data.Aeson (
     genericToEncoding,
  )
 import Data.ByteString qualified as B
+import Data.ByteString.Lazy qualified as BL
 import Data.Foldable (traverse_)
-import Data.String (IsString (fromString))
 import Data.Text (Text, pack)
 import GHC.Generics (Generic)
 import System.IO.Strict qualified as S
@@ -20,34 +20,25 @@ data Row a = Row
     deriving (Generic, Show)
 
 eventsFile :: FilePath
-eventsFile = "events.txt"
+eventsFile = "events.json"
 
 saveEvents :: (ToJSON a) => [a] -> IO ()
-saveEvents = traverse_ saveRow
-  where
-    saveRow rowData = getNewId >>= \rowId -> appendRow . encode $ Row{rowId, rowData}
+saveEvents = traverse_ (appendRow . encode)
 
-getNewId :: IO Int
-getNewId =
-    S.readFile eventsFile >>= \contents ->
-        let numberOfLines = length . lines $ contents
-         in pure (numberOfLines + 1)
-
-appendRow :: (Show a) => a -> IO ()
-appendRow = B.appendFile eventsFile . fromString . (<> "\n") . show
+appendRow :: BL.ByteString -> IO ()
+appendRow = B.appendFile eventsFile . (<> "\n") . BL.toStrict
 
 -- Products
 productsFile :: FilePath
 productsFile = "products.txt"
 
-getProductCode :: Text -> IO (Maybe Text)
-getProductCode productName = do
+getProductMap :: IO [(Text, Text)]
+getProductMap = do
     contents <- S.readFile productsFile
     let productLines = lines contents
     let productLines' = map words productLines
-    let products = map (\(code : rest) -> (pack (concat rest), pack code)) productLines'
-    let productCode = lookup productName products
-    return productCode
+    let productMap = map (\(code : rest) -> (pack (concat rest), pack code)) productLines'
+    return productMap
 
 instance (ToJSON a) => ToJSON (Row a) where
     toEncoding = genericToEncoding defaultOptions

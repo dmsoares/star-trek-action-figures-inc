@@ -9,6 +9,7 @@ import Data.Aeson (
     genericToEncoding,
  )
 import OrderTaking.PlaceOrder.Dto (OrderDto, OrderLineDto)
+import OrderTaking.PlaceOrder.PublicTypes (DomainEvent)
 
 -- JSON encoding and decoding
 instance ToJSON OrderDto where
@@ -18,3 +19,6 @@ instance FromJSON OrderDto
 instance ToJSON OrderLineDto where
     toEncoding = genericToEncoding defaultOptions
 instance FromJSON OrderLineDto
+
+instance (ToJSON a) => ToJSON (DomainEvent a) where
+    toEncoding = genericToEncoding defaultOptions

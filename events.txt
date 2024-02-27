@@ -1,2 +1,0 @@
-Row {rowId = 1, rowData = ValidatedOrder {orderId = d8d2b43f-9941-4bf5-89d5-634f50bfe78a, customerId = 1, orderLines = [ValidatedOrderLine {productCode = "CHMA0000028982", productName = "Scotty", quantity = 5}], shippingAddress = "Chateau Picard, La Barre"}}
-"{\"rowId\":2,\"rowData\":{\"orderId\":\"6249ea7a-5970-4785-9fa4-21aae34fc3e9\",\"customerId\":1,\"orderLines\":[{\"productCode\":\"CHMA0000289509\",\"productName\":\"Picard\",\"quantity\":5}],\"shippingAddress\":\"Chateau Picard, La Barre\"}}"
