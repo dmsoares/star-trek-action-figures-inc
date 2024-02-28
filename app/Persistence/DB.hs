@@ -35,9 +35,9 @@ productsFile = "products.txt"
 getProductMap :: IO [(Text, Text)]
 getProductMap = do
     contents <- S.readFile productsFile
-    let productLines = lines contents
-    let productLines' = map words productLines
-    let productMap = map (\(code : rest) -> (pack (concat rest), pack code)) productLines'
+    let productLines = map words (lines contents)
+    let productMap = map (\(code : rest) -> (pack (unwords rest), pack code)) productLines
+    print productMap
     return productMap
 
 instance (ToJSON a) => ToJSON (Row a) where

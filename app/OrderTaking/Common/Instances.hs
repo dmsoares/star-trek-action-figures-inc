@@ -10,7 +10,7 @@ import Data.Aeson (
  )
 
 import OrderTaking.Common.Order (ValidatedOrder, ValidatedOrderLine)
-import OrderTaking.Common.ValueObjects (ProductCode, ProductName)
+import OrderTaking.Common.ValueObjects (ProductCode, ProductName, ProductQuantity)
 
 -- Value objects
 -- JSON encoding and decoding
@@ -21,6 +21,10 @@ instance FromJSON ProductCode
 instance ToJSON ProductName where
     toEncoding = genericToEncoding defaultOptions
 instance FromJSON ProductName
+
+instance ToJSON ProductQuantity where
+    toEncoding = genericToEncoding defaultOptions
+instance FromJSON ProductQuantity
 
 -- Order
 -- JSON encoding and decoding

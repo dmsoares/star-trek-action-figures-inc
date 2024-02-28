@@ -25,14 +25,6 @@ main = scotty 3000
     $ do
         post "/order" handleOrder
 
--- handleOrder :: ActionM ()
--- handleOrder = do
---     maybeOrderDto <- decodeOrderDto
---     flip (maybe malformedRequest) maybeOrderDto $ \orderDto -> do
---         (productMap, newOrderId) <- getDependencies
---         let unvalidatedOrder = toUnvalidatedOrder newOrderId orderDto
---         either code400 (liftIO . saveEvents) (placeOrder productMap unvalidatedOrder)
-
 handleOrder :: ActionM ()
 handleOrder =
     decodeOrderDto >>= \maybeOrderDto -> flip (maybe malformedRequest) maybeOrderDto $ \orderDto ->

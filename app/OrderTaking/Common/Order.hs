@@ -1,13 +1,19 @@
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+
+{-# HLINT ignore "Use >=>" #-}
+
 module OrderTaking.Common.Order (UnvalidatedOrder (..), UnvalidatedOrderLine (..), ValidatedOrder, ValidatedOrderLine, ProductMap, validateOrder) where
 
-import Data.Text (Text, unpack)
+import Data.Text (Text)
 import Data.UUID (UUID)
 import GHC.Generics (Generic)
+import OrderTaking.Common.ValueObjects (ProductCode, ProductName, ProductQuantity, createProductCode, createProductName, createProductQuantity, unwrapProductName)
 
-type ProductCode = Text
-type ProductName = Text
+type ProductMap = [(Text, Text)]
 
-type ProductMap = [(ProductName, ProductCode)]
+type UnvalidatedProductName = Text
+type UnvalidatedAddress = Text
+type UnvalidatedQuantity = Int
 
 data ValidatedOrder = ValidatedOrder
     { orderId :: UUID
@@ -18,9 +24,9 @@ data ValidatedOrder = ValidatedOrder
     deriving (Generic, Show)
 
 data ValidatedOrderLine = ValidatedOrderLine
-    { productCode :: Text
-    , productName :: Text
-    , quantity :: Int
+    { productCode :: ProductCode
+    , productName :: ProductName
+    , quantity :: ProductQuantity
     }
     deriving (Generic, Show)
 
@@ -28,24 +34,30 @@ data UnvalidatedOrder = UnvalidatedOrder
     { orderId :: UUID
     , customerId :: Int
     , orderLines :: [UnvalidatedOrderLine]
-    , shippingAddress :: Text
+    , shippingAddress :: UnvalidatedAddress
     }
     deriving (Show)
 
 data UnvalidatedOrderLine = UnvalidatedOrderLine
-    { productName :: Text
-    , quantity :: Int
+    { productName :: UnvalidatedProductName
+    , quantity :: UnvalidatedQuantity
     }
     deriving (Show)
 
 validateOrder :: ProductMap -> UnvalidatedOrder -> Either String ValidatedOrder
 validateOrder productMap UnvalidatedOrder{orderId, customerId, orderLines, shippingAddress} =
-    case traverse (validateOrderLine productMap) orderLines of
-        Left err -> Left err
-        Right validatedOrderLines -> Right (ValidatedOrder{orderId, customerId, orderLines = validatedOrderLines, shippingAddress})
+    case traverse (createValidOrderLine productMap) orderLines of
+        Nothing -> Left "Some order lines are invalid. Please check the product names and quantities"
+        Just validatedOrderLines -> Right (ValidatedOrder{orderId, customerId, orderLines = validatedOrderLines, shippingAddress})
 
-validateOrderLine :: ProductMap -> UnvalidatedOrderLine -> Either String ValidatedOrderLine
-validateOrderLine productMap (UnvalidatedOrderLine{productName, quantity}) =
-    case lookup productName productMap of
-        Nothing -> Left ("Invalid product name: " <> unpack productName)
-        Just productCode -> Right (ValidatedOrderLine{productCode, productName, quantity})
+createValidOrderLine :: ProductMap -> UnvalidatedOrderLine -> Maybe ValidatedOrderLine
+createValidOrderLine productMap (UnvalidatedOrderLine unvalidatedProductName unvalidatedQuantity) =
+    validateOrderLineInfo (unvalidatedProductName, unvalidatedQuantity) >>= \(productName, quantity) ->
+        lookup (unwrapProductName productName) productMap >>= \rawProductCode ->
+            createProductCode rawProductCode >>= \productCode -> Just (ValidatedOrderLine{productCode, productName, quantity})
+
+validateOrderLineInfo :: (UnvalidatedProductName, UnvalidatedQuantity) -> Maybe (ProductName, ProductQuantity)
+validateOrderLineInfo (unvalidatedProductName, unvalidatedQuantity) =
+    createProductName unvalidatedProductName >>= \productName ->
+        createProductQuantity unvalidatedQuantity >>= \quantity ->
+            Just (productName, quantity)
