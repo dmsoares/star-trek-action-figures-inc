@@ -1,4 +1,4 @@
-module Persistence.DB (saveEvents, getProductMap) where
+module Infrastructure.DB (saveEvents, getProductMap) where
 
 import Data.Aeson (
     ToJSON (toEncoding),
@@ -36,9 +36,7 @@ getProductMap :: IO [(Text, Text)]
 getProductMap = do
     contents <- S.readFile productsFile
     let productLines = map words (lines contents)
-    let productMap = map (\(code : rest) -> (pack (unwords rest), pack code)) productLines
-    print productMap
-    return productMap
+    pure $ map (\(code : rest) -> (pack (unwords rest), pack code)) productLines
 
 instance (ToJSON a) => ToJSON (Row a) where
     toEncoding = genericToEncoding defaultOptions

@@ -1,4 +1,4 @@
-module OrderTaking.Common.ValueObjects (
+module OrderTaking.Common.Types (
     ProductCode,
     ProductName,
     ProductQuantity,

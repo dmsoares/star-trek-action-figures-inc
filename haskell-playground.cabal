@@ -65,7 +65,8 @@ executable haskell-playground
     main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
-    -- other-modules:  
+    other-modules:    HttpUtils,
+                      Handlers  
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -87,15 +88,19 @@ executable haskell-playground
 library order-taking
     import: base
     hs-source-dirs: lib
-    exposed-modules:  OrderTaking.Common.Order,
-                      OrderTaking.Common.ValueObjects,
+    exposed-modules:  OrderTaking.Common.Types,
                       OrderTaking.Common.Instances,
-                      OrderTaking.PlaceOrder.PublicTypes,
-                      OrderTaking.PlaceOrder.Dto,
-                      OrderTaking.PlaceOrder.Workflow,
-                      OrderTaking.PlaceOrder.Instances,
+                      OrderTaking.Common.Events,
+                      OrderTaking.Workflows.PlaceOrder.Dtos.Downstream,
+                      OrderTaking.Workflows.PlaceOrder.Dtos.Downstream.OrderPlacedData,
+                      OrderTaking.Workflows.PlaceOrder.Dtos.Upstream,
+                      OrderTaking.Workflows.PlaceOrder.Dtos.Instances,
+                      OrderTaking.Workflows.PlaceOrder.Types.UnvalidatedOrder,
+                      OrderTaking.Workflows.PlaceOrder.Workflow.CreateEvents,
+                      OrderTaking.Workflows.PlaceOrder.Workflow.ValidateOrder,
+                      OrderTaking.Workflows.PlaceOrder.Workflow,
 
-                      Persistence.DB
+                      Infrastructure.DB,
 
     build-depends:    aeson,
                       bytestring,
