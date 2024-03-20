@@ -9,7 +9,8 @@ import Data.Aeson (
 import Data.ByteString qualified as B
 import Data.ByteString.Lazy qualified as BL
 import Data.Foldable (traverse_)
-import Data.Text (Text, pack)
+import Data.Map qualified as M
+import Data.Text (Text, pack, split)
 import GHC.Generics (Generic)
 import System.IO.Strict qualified as S
 
@@ -32,11 +33,16 @@ appendRow = B.appendFile eventsFile . (<> "\n") . BL.toStrict
 productsFile :: FilePath
 productsFile = "products.txt"
 
-getProductMap :: IO [(Text, Text)]
+type ProductMap = M.Map Text Text
+
+getProductMap :: IO (Maybe ProductMap)
 getProductMap = do
     contents <- S.readFile productsFile
-    let productLines = map words (lines contents)
-    pure $ map (\(code : rest) -> (pack (unwords rest), pack code)) productLines
+    let productLines = traverse (toTuple . split (== ',') . pack) (lines contents)
+    pure $ M.fromList <$> productLines
+  where
+    toTuple [a, b] = Just (a, b)
+    toTuple _ = Nothing
 
 instance (ToJSON a) => ToJSON (Row a) where
     toEncoding = genericToEncoding defaultOptions

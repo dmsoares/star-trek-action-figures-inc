@@ -1,9 +1,10 @@
 module OrderTaking.Workflows.PlaceOrder.Workflow.CreateEvents where
 
-import OrderTaking.Workflows.PlaceOrder.Dtos.Downstream (PlaceOrderEvent (..), mkOrderPlacedEvent)
-import OrderTaking.Workflows.PlaceOrder.Workflow.ValidateOrder (ValidatedOrder)
+import OrderTaking.Workflows.PlaceOrder.Types.Events (PlaceOrderEvent, mkOrderPlacedEvent, mkShippableOrderPlacedEvent)
+import OrderTaking.Workflows.PlaceOrder.Types.PricedOrder (PricedOrder)
 
-createEvents :: ValidatedOrder -> [PlaceOrderEvent]
-createEvents validatedOrder =
-    let orderPlaced = mkOrderPlacedEvent validatedOrder
-     in [orderPlaced]
+createEvents :: PricedOrder -> [PlaceOrderEvent]
+createEvents pricedOrder =
+    let orderPlaced = mkOrderPlacedEvent pricedOrder
+        shippableOrderPlaced = mkShippableOrderPlacedEvent pricedOrder
+     in [orderPlaced, shippableOrderPlaced]

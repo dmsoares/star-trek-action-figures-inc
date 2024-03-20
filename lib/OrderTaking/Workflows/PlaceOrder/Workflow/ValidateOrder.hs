@@ -1,74 +1,37 @@
-{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+module OrderTaking.Workflows.PlaceOrder.Workflow.ValidateOrder where
 
-{-# HLINT ignore "Use >=>" #-}
-
-module OrderTaking.Workflows.PlaceOrder.Workflow.ValidateOrder (
-    ValidatedOrder,
-    ValidatedOrderLine,
-    ProductMap,
-    orderId,
-    customerId,
-    orderLines,
-    shippingAddress,
-    productCode,
-    productName,
-    quantity,
-    validateOrder,
-) where
-
-import Data.Text (Text)
-import Data.UUID (UUID)
-import GHC.Generics (Generic)
 import OrderTaking.Common.Types (
-    ProductCode,
-    ProductName,
-    ProductQuantity,
-    createProductCode,
+    createAddress,
     createProductName,
     createProductQuantity,
-    unwrapProductName,
  )
 import OrderTaking.Workflows.PlaceOrder.Types.UnvalidatedOrder qualified as UO
-
--- | A validated order is an order that has been checked for correctness
-data ValidatedOrder = ValidatedOrder
-    { orderId :: UUID
-    , customerId :: Int
-    , orderLines :: [ValidatedOrderLine]
-    , shippingAddress :: Text
-    }
-    deriving (Generic, Show)
-
-data ValidatedOrderLine = ValidatedOrderLine
-    { productCode :: ProductCode
-    , productName :: ProductName
-    , quantity :: ProductQuantity
-    }
-    deriving (Generic, Show)
-
--- | A product map is a list of tuples where the first element is the product name and the second element is the product code
-type ProductMap = [(Text, Text)]
+import OrderTaking.Workflows.PlaceOrder.Types.ValidatedOrder (ValidatedOrder (..), ValidatedOrderLine (..))
 
 -- | Validate an order
-validateOrder :: ProductMap -> UO.UnvalidatedOrder -> Either String ValidatedOrder
-validateOrder productMap UO.UnvalidatedOrder{orderId, customerId, orderLines, shippingAddress} =
-    case traverse (createValidOrderLine productMap) orderLines of
-        Nothing -> Left "Some order lines are invalid. Please check the product names and quantities"
-        Just validatedOrderLines -> Right (ValidatedOrder{orderId, customerId, orderLines = validatedOrderLines, shippingAddress})
+validateOrder :: UO.UnvalidatedOrder -> Either String ValidatedOrder
+validateOrder UO.UnvalidatedOrder{orderId, customerId, orderLines, shippingAddress} =
+    let maybeValidatedOrder =
+            -- \ Try to create a order from order lines and shipping address
+            ValidatedOrder orderId customerId
+                <$> traverse createValidOrderLine orderLines
+                <*> createAddress shippingAddress
+     in -- This is a common pattern in Haskell to convert a Maybe to an Either
+        -- If the whole computation fails with a Nothing (of type Maybe), return a Left (of type Either) with an error message
+        -- otherwise, return a Right with the result
+        maybe invalidOrderError Right maybeValidatedOrder
+  where
+    invalidOrderError = Left "Some order lines are invalid. Please check the product names and quantities"
 
-createValidOrderLine :: ProductMap -> UO.UnvalidatedOrderLine -> Maybe ValidatedOrderLine
-createValidOrderLine productMap (UO.UnvalidatedOrderLine unvalidatedProductName unvalidatedQuantity) =
-    validateOrderLineInfo (unvalidatedProductName, unvalidatedQuantity)
-        >>= \(productName, quantity) ->
-            lookup (unwrapProductName productName) productMap
-                >>= \rawProductCode ->
-                    createProductCode rawProductCode
-                        >>= \productCode -> Just (ValidatedOrderLine{productCode, productName, quantity})
-
-validateOrderLineInfo :: (UO.UnvalidatedProductName, UO.UnvalidatedQuantity) -> Maybe (ProductName, ProductQuantity)
-validateOrderLineInfo (unvalidatedProductName, unvalidatedQuantity) =
-    createProductName unvalidatedProductName
-        >>= \productName ->
-            createProductQuantity unvalidatedQuantity
-                >>= \quantity ->
-                    Just (productName, quantity)
+    -- \ Try to create a validated order line from an unvalidated order line
+    -- Return (Just validatedOrder) if successful, Nothing if not
+    createValidOrderLine :: UO.UnvalidatedOrderLine -> Maybe ValidatedOrderLine
+    createValidOrderLine
+        (UO.UnvalidatedOrderLine unvalidatedProductName unvalidatedQuantity) =
+            -- what we are expressing here is:
+            -- try to build a ValidatedOrderLine from the productCode, productName and quantity
+            -- taking into account that any of these steps could fail
+            -- and, if any of them fail, return a Nothing
+            ValidatedOrderLine
+                <$> createProductName unvalidatedProductName -- create the product name
+                <*> createProductQuantity unvalidatedQuantity -- create the product quantity

@@ -1,7 +1,6 @@
 module Main where
 
 import Handlers (handlePlaceOrder)
-import OrderTaking.Common.Instances ()
 import OrderTaking.Workflows.PlaceOrder.Dtos.Instances ()
 import Web.Scotty (
     post,

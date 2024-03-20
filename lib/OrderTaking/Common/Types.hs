@@ -3,28 +3,32 @@ module OrderTaking.Common.Types (
     ProductName,
     ProductQuantity,
     Address,
+    Price,
     createProductCode,
     createProductName,
     createProductQuantity,
     createAddress,
-    unwrapProductName,
+    createPrice,
 ) where
 
 import Data.Text (Text)
 import Data.Text qualified as T
-import GHC.Generics (Generic)
+import Text.Read (readMaybe)
 
 newtype ProductName = ProductName Text
-    deriving (Generic, Eq, Show)
+    deriving (Eq)
 
 newtype ProductCode = ProductCode Text
-    deriving (Generic, Eq, Show)
+    deriving (Eq)
 
 newtype ProductQuantity = ProductQuantity Int
-    deriving (Generic, Eq, Show)
+    deriving (Eq)
 
 newtype Address = Address Text
-    deriving (Generic, Eq, Show)
+    deriving (Eq)
+
+newtype Price = Price Double
+    deriving (Num, Eq)
 
 createProductName :: Text -> Maybe ProductName
 createProductName name =
@@ -50,5 +54,21 @@ createAddress address =
             then Just (Address address)
             else Nothing
 
-unwrapProductName :: ProductName -> Text
-unwrapProductName (ProductName name) = name
+createPrice :: Text -> Maybe Price
+createPrice price = Price <$> readMaybe (T.unpack price)
+
+-- Instances
+instance Show ProductName where
+    show (ProductName name) = show name
+
+instance Show ProductCode where
+    show (ProductCode code) = show code
+
+instance Show ProductQuantity where
+    show (ProductQuantity quantity) = show quantity
+
+instance Show Address where
+    show (Address address) = show address
+
+instance Show Price where
+    show (Price price) = show price

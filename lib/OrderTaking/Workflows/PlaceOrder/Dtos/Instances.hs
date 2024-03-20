@@ -8,24 +8,27 @@ import Data.Aeson (
     defaultOptions,
     genericToEncoding,
  )
-import OrderTaking.Common.Instances ()
-import OrderTaking.Workflows.PlaceOrder.Dtos.Downstream qualified as Downstream
+import OrderTaking.Workflows.PlaceOrder.Dtos.Downstream (PlacedOrderEventDto)
+import OrderTaking.Workflows.PlaceOrder.Dtos.Downstream.OrderPlacedDto qualified as OP
+import OrderTaking.Workflows.PlaceOrder.Dtos.Downstream.ShippableOrderPlacedDto qualified as SOP
 import OrderTaking.Workflows.PlaceOrder.Dtos.Upstream qualified as Upstream
 
 -- JSON encoding and decoding
-instance ToJSON Upstream.Order where
-    toEncoding = genericToEncoding defaultOptions
-instance FromJSON Upstream.Order
+instance FromJSON Upstream.OrderDto
 
-instance ToJSON Upstream.OrderLine where
-    toEncoding = genericToEncoding defaultOptions
-instance FromJSON Upstream.OrderLine
+instance FromJSON Upstream.OrderLineDto
 
-instance ToJSON Downstream.OrderLine where
+instance ToJSON OP.OrderLineDto where
     toEncoding = genericToEncoding defaultOptions
 
-instance ToJSON Downstream.OrderPlacedData where
+instance ToJSON OP.OrderPlacedDto where
     toEncoding = genericToEncoding defaultOptions
 
-instance ToJSON Downstream.PlaceOrderEvent where
+instance ToJSON SOP.OrderLineDto where
+    toEncoding = genericToEncoding defaultOptions
+
+instance ToJSON SOP.ShippableOrderPlacedDto where
+    toEncoding = genericToEncoding defaultOptions
+
+instance ToJSON PlacedOrderEventDto where
     toEncoding = genericToEncoding defaultOptions

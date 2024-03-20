@@ -8,24 +8,24 @@ import OrderTaking.Workflows.PlaceOrder.Types.UnvalidatedOrder (
     UnvalidatedOrderLine (..),
  )
 
-data Order = Order
+data OrderDto = OrderDto
     { customerId :: Int
-    , orderLines :: [OrderLine]
+    , orderLines :: [OrderLineDto]
     , shippingAddress :: Text
     }
     deriving (Generic, Show)
 
-data OrderLine = OrderLine
+data OrderLineDto = OrderLineDto
     { productName :: Text
     , quantity :: Int
     }
     deriving (Generic, Show)
 
-toUnvalidatedOrderLine :: OrderLine -> UnvalidatedOrderLine
-toUnvalidatedOrderLine OrderLine{productName, quantity} = UnvalidatedOrderLine{productName, quantity}
+toUnvalidatedOrderLine :: OrderLineDto -> UnvalidatedOrderLine
+toUnvalidatedOrderLine OrderLineDto{productName, quantity} = UnvalidatedOrderLine{productName, quantity}
 
-toUnvalidatedOrder :: UUID -> Order -> UnvalidatedOrder
-toUnvalidatedOrder orderId Order{customerId, orderLines, shippingAddress} =
+toUnvalidatedOrder :: UUID -> OrderDto -> UnvalidatedOrder
+toUnvalidatedOrder orderId OrderDto{customerId, orderLines, shippingAddress} =
     UnvalidatedOrder
         { orderId
         , customerId

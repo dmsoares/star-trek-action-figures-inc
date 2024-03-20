@@ -1,16 +1,14 @@
-module OrderTaking.Workflows.PlaceOrder.Dtos.Downstream (PlaceOrderEvent (..), mkOrderPlacedEvent, module OP) where
+module OrderTaking.Workflows.PlaceOrder.Dtos.Downstream where
 
 import GHC.Generics (Generic)
-import OrderTaking.Common.Events (Event (Event))
-import OrderTaking.Workflows.PlaceOrder.Dtos.Downstream.OrderPlacedData as OP (
-    OrderLine,
-    OrderPlacedData,
-    mkOrderPlacedData,
- )
-import OrderTaking.Workflows.PlaceOrder.Workflow.ValidateOrder qualified as VO
+import OrderTaking.Common.Event (Event (..))
+import OrderTaking.Workflows.PlaceOrder.Dtos.Downstream.OrderPlacedDto (OrderPlacedDto, mkOrderPlacedDto)
+import OrderTaking.Workflows.PlaceOrder.Dtos.Downstream.ShippableOrderPlacedDto (ShippableOrderPlacedDto, mkShippableOrderPlacedDto)
+import OrderTaking.Workflows.PlaceOrder.Types.Events (PlaceOrderEvent (OrderPlacedEvent, ShippableOrderPlacedEvent))
 
-newtype PlaceOrderEvent = OrderPlacedEvent (Event OrderPlacedData)
+data PlacedOrderEventDto = OrderPlacedEventDto OrderPlacedDto | ShippableOrderPlacedEventDto ShippableOrderPlacedDto
     deriving (Generic, Show)
 
-mkOrderPlacedEvent :: VO.ValidatedOrder -> PlaceOrderEvent
-mkOrderPlacedEvent = OrderPlacedEvent . Event "OrderPlaced" . mkOrderPlacedData
+mkEventDto :: PlaceOrderEvent -> PlacedOrderEventDto
+mkEventDto (OrderPlacedEvent (Event _ event)) = OrderPlacedEventDto $ mkOrderPlacedDto event
+mkEventDto (ShippableOrderPlacedEvent (Event _ event)) = ShippableOrderPlacedEventDto $ mkShippableOrderPlacedDto event

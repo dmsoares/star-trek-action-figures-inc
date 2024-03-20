@@ -1,4 +1,4 @@
-module OrderTaking.Common.Events where
+module OrderTaking.Common.Event where
 
 import Data.Aeson (ToJSON (toEncoding), defaultOptions, genericToEncoding)
 import Data.Text (Text)
