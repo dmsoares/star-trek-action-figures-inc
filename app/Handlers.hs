@@ -8,9 +8,10 @@ import Data.UUID (UUID)
 import Data.UUID.V4 (nextRandom)
 import HttpUtils (code400, malformedRequest)
 import Infrastructure.DB (getProductMap, saveEvents)
-import OrderTaking.Workflows.PlaceOrder.Dtos.Downstream (mkEventDto)
+import OrderTaking.Workflows.PlaceOrder.Dtos.Downstream (PlaceOrderEventDto, mkEventDto)
 import OrderTaking.Workflows.PlaceOrder.Dtos.Instances ()
 import OrderTaking.Workflows.PlaceOrder.Dtos.Upstream (OrderDto, toUnvalidatedOrder)
+import OrderTaking.Workflows.PlaceOrder.Types.Events (PlaceOrderEvent)
 import OrderTaking.Workflows.PlaceOrder.Workflow (placeOrder)
 import OrderTaking.Workflows.PlaceOrder.Workflow.PriceOrder (ProductMap)
 import Web.Scotty (ActionM, body, throw)
@@ -20,23 +21,22 @@ handlePlaceOrder :: ActionM ()
 handlePlaceOrder = do
     -- try to deserialize the request
     maybeOrderDto <- deserializeOrderDto
-    case maybeOrderDto of
-        -- if the deserialization fails, return a 400
-        Nothing -> malformedRequest
-        -- otherwise, continue
-        Just orderDto -> do
-            -- get the workflow dependencies
-            (productMap, newOrderId) <- getDependencies
-            -- run the workflow
-            persistEvents . fmap (fmap mkEventDto) $ placeOrder productMap (toUnvalidatedOrder newOrderId orderDto)
+    flip (maybe malformedRequest) maybeOrderDto $ \orderDto -> do
+        -- get the workflow dependencies
+        (productMap, newOrderId) <- getDependencies
+        -- run the workflow
+        let result = placeOrder productMap (toUnvalidatedOrder newOrderId orderDto)
+        -- persist the events or raise code 400
+        either code400 (persistEvents . createEventDtos) result
 
 deserializeOrderDto :: ActionM (Maybe OrderDto)
 deserializeOrderDto = decode <$> body :: ActionM (Maybe OrderDto)
 
-persistEvents :: (ToJSON a) => Either String [a] -> ActionM ()
-persistEvents workflowResult = case workflowResult of
-    Left err -> code400 err
-    Right events -> liftIO $ saveEvents events
+createEventDtos :: [PlaceOrderEvent] -> [PlaceOrderEventDto]
+createEventDtos = fmap mkEventDto
+
+persistEvents :: (ToJSON a) => [a] -> ActionM ()
+persistEvents = liftIO . saveEvents
 
 getDependencies :: ActionM (ProductMap, UUID)
 getDependencies = do

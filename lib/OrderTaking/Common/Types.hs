@@ -9,6 +9,7 @@ module OrderTaking.Common.Types (
     createProductQuantity,
     createAddress,
     createPrice,
+    unProductQuantity,
 ) where
 
 import Data.Text (Text)
@@ -21,8 +22,8 @@ newtype ProductName = ProductName Text
 newtype ProductCode = ProductCode Text
     deriving (Eq)
 
-newtype ProductQuantity = ProductQuantity Int
-    deriving (Eq)
+newtype ProductQuantity = ProductQuantity {unProductQuantity :: Int}
+    deriving (Num, Eq)
 
 newtype Address = Address Text
     deriving (Eq)
