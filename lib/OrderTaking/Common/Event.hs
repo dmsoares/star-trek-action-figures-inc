@@ -4,11 +4,12 @@ import Data.Aeson (ToJSON (toEncoding), defaultOptions, genericToEncoding)
 import Data.Text (Text)
 import GHC.Generics (Generic)
 
-data Event a = Event
+-- | A generic event DTO type
+data EventDto a = EventDto
     { eventType :: Text
     , eventData :: a
     }
     deriving (Generic, Show)
 
-instance (ToJSON a) => ToJSON (Event a) where
+instance (ToJSON a) => ToJSON (EventDto a) where
     toEncoding = genericToEncoding defaultOptions

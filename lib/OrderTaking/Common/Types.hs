@@ -10,13 +10,23 @@ module OrderTaking.Common.Types (
     createAddress,
     createPrice,
     unProductQuantity,
+    unProductName,
 ) where
 
 import Data.Text (Text)
 import Data.Text qualified as T
 import Text.Read (readMaybe)
 
-newtype ProductName = ProductName Text
+-- These types are not specific to any workflow.
+
+-- More importantly, they are an example of a common pattern in Haskell to make illegal states unrepresentable.
+-- The trick is not to expose the constructors of the types, but to provide functions to create them.
+-- These are known as smart constructors and can do runtime checks to ensure that the values are valid under our domain.
+
+-- For example, we do not accept empty product names, so we have a runtime check for that.
+-- So, anytime we have a ProductName outside this module, we can be sure that it is not empty.
+
+newtype ProductName = ProductName {unProductName :: Text}
     deriving (Eq)
 
 newtype ProductCode = ProductCode Text

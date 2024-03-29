@@ -21,9 +21,7 @@ data OrderLineDto = OrderLineDto
     }
     deriving (Generic, Show)
 
-toUnvalidatedOrderLine :: OrderLineDto -> UnvalidatedOrderLine
-toUnvalidatedOrderLine OrderLineDto{productName, quantity} = UnvalidatedOrderLine{productName, quantity}
-
+-- | Convert an OrderDto to an UnvalidatedOrder adding an OrderId
 toUnvalidatedOrder :: UUID -> OrderDto -> UnvalidatedOrder
 toUnvalidatedOrder orderId OrderDto{customerId, orderLines, shippingAddress} =
     UnvalidatedOrder
@@ -32,3 +30,10 @@ toUnvalidatedOrder orderId OrderDto{customerId, orderLines, shippingAddress} =
         , orderLines = map toUnvalidatedOrderLine orderLines
         , shippingAddress
         }
+  where
+    toUnvalidatedOrderLine :: OrderLineDto -> UnvalidatedOrderLine
+    toUnvalidatedOrderLine OrderLineDto{productName, quantity} =
+        UnvalidatedOrderLine
+            { productName
+            , quantity
+            }

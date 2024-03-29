@@ -1,5 +1,6 @@
 module OrderTaking.Workflows.PlaceOrder.Workflow.ValidateOrder where
 
+import Data.Text (Text)
 import OrderTaking.Common.Types (
     createAddress,
     createProductName,
@@ -9,7 +10,7 @@ import OrderTaking.Workflows.PlaceOrder.Types.UnvalidatedOrder qualified as UO
 import OrderTaking.Workflows.PlaceOrder.Types.ValidatedOrder (ValidatedOrder (..), ValidatedOrderLine (..))
 
 -- | Validate an order
-validateOrder :: UO.UnvalidatedOrder -> Either String ValidatedOrder
+validateOrder :: UO.UnvalidatedOrder -> Either Text ValidatedOrder
 validateOrder UO.UnvalidatedOrder{orderId, customerId, orderLines, shippingAddress} =
     let maybeValidatedOrder =
             -- \ Try to create a order from order lines and shipping address

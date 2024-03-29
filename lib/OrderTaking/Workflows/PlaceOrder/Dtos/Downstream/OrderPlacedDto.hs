@@ -21,14 +21,16 @@ data OrderLineDto = OrderLineDto
 mkOrderPlacedDto :: OP.OrderPlaced -> OrderPlacedDto
 mkOrderPlacedDto event =
     OrderPlacedDto
-        (show $ OP.orderId event)
-        (show $ OP.customerId event)
-        (map createOrderPlacedLine $ OP.orderLines event)
-        (show $ OP.totalPrice event)
+        { orderId = show $ OP.orderId event
+        , customerId = show $ OP.customerId event
+        , orderLines = map createOrderPlacedLine $ OP.orderLines event
+        , totalPrice = show $ OP.totalPrice event
+        }
   where
     createOrderPlacedLine :: OP.OrderLine -> OrderLineDto
     createOrderPlacedLine line =
         OrderLineDto
-            (show $ OP.productName line)
-            (show $ OP.quantity line)
-            (show $ OP.price line)
+            { productName = show $ OP.productName line
+            , quantity = show $ OP.quantity line
+            , price = show $ OP.price line
+            }

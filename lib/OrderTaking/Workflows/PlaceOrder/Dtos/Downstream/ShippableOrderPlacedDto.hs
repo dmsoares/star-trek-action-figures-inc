@@ -20,13 +20,15 @@ data OrderLineDto = OrderLineDto
 mkShippableOrderPlacedDto :: SOP.ShippableOrderPlaced -> ShippableOrderPlacedDto
 mkShippableOrderPlacedDto event =
     ShippableOrderPlacedDto
-        (show $ SOP.orderId event)
-        (show $ SOP.customerId event)
-        (map createOrderPlacedLine $ SOP.orderLines event)
-        (show $ SOP.shippingAddress event)
+        { orderId = show $ SOP.orderId event
+        , customerId = show $ SOP.customerId event
+        , orderLines = map createOrderPlacedLine $ SOP.orderLines event
+        , shippingAddress = show $ SOP.shippingAddress event
+        }
   where
     createOrderPlacedLine :: SOP.OrderLine -> OrderLineDto
     createOrderPlacedLine line =
         OrderLineDto
-            (show $ SOP.productName line)
-            (show $ SOP.quantity line)
+            { productName = show $ SOP.productName line
+            , quantity = show $ SOP.quantity line
+            }
