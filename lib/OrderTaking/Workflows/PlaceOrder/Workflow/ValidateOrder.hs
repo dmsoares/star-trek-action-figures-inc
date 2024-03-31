@@ -13,7 +13,7 @@ import OrderTaking.Workflows.PlaceOrder.Types.ValidatedOrder (ValidatedOrder (..
 validateOrder :: UO.UnvalidatedOrder -> Either Text ValidatedOrder
 validateOrder UO.UnvalidatedOrder{orderId, customerId, orderLines, shippingAddress} =
     let maybeValidatedOrder =
-            -- \ Try to create a order from order lines and shipping address
+            -- Try to create a order from order lines and shipping address
             ValidatedOrder orderId customerId
                 <$> traverse createValidOrderLine orderLines
                 <*> createAddress shippingAddress
@@ -24,7 +24,7 @@ validateOrder UO.UnvalidatedOrder{orderId, customerId, orderLines, shippingAddre
   where
     invalidOrderError = Left "Some order lines are invalid. Please check the product names and quantities"
 
-    -- \ Try to create a validated order line from an unvalidated order line
+    -- Try to create a validated order line from an unvalidated order line
     -- Return (Just validatedOrder) if successful, Nothing if not
     createValidOrderLine :: UO.UnvalidatedOrderLine -> Maybe ValidatedOrderLine
     createValidOrderLine
