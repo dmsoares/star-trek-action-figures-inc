@@ -10,21 +10,21 @@ import Data.Text (Text, pack, split)
 import System.IO.Strict qualified as S
 
 eventsFile :: FilePath
-eventsFile = "events.json"
+eventsFile = "db/events.json"
 
 saveEvents :: (Show a, ToJSON a) => [a] -> IO ()
-saveEvents s = do
-    print s
-    traverse_ (appendRow . encode) s
+saveEvents events = do
+    let encodedEvents = fmap encode events
+    traverse_ appendAndPrint encodedEvents
+  where
+    appendAndPrint event = appendRow event >> print event
 
 appendRow :: BL.ByteString -> IO ()
-appendRow s = do
-    print s
-    B.appendFile eventsFile . (<> "\n") . BL.toStrict $ s
+appendRow = B.appendFile eventsFile . (<> "\n") . BL.toStrict
 
 -- Products
 productsFile :: FilePath
-productsFile = "products.txt"
+productsFile = "db/products.txt"
 
 type ProductMap = M.Map Text Text
 

@@ -11,7 +11,7 @@ cabal-version:      3.0
 --   http://haskell.org/cabal/users-guide/
 --
 -- The name of the package.
-name:               haskell-playground
+name:               star-trek-action-figures-inc
 
 -- The package version.
 -- See the Haskell package versioning policy (PVP) for standards
@@ -57,7 +57,7 @@ common base
     default-language: GHC2021
     default-extensions: OverloadedStrings, DuplicateRecordFields
 
-executable haskell-playground
+executable star-trek-action-figures-inc
     -- Import common warning flags.
     import:           base
 

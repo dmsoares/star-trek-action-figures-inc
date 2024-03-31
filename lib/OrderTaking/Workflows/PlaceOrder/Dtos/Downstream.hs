@@ -21,5 +21,5 @@ mkEventDto (OrderPlacedEvent eventData) = OrderPlacedEventDto (mkOrderPlacedDto 
 mkEventDto (ShippableOrderPlacedEvent eventData) = ShippableOrderPlacedEventDto (mkShippableOrderPlacedDto eventData)
 
 instance ToJSON PlaceOrderEventDto where
-    toEncoding (OrderPlacedEventDto eventData) = pairs ("eventType" .= ("OrderPlacedEvent" :: Text) <> "eventData" .= eventData)
-    toEncoding (ShippableOrderPlacedEventDto eventData) = pairs ("eventType" .= ("ShippableOrderPlacedEvent" :: Text) <> "eventData" .= eventData)
+    toEncoding (OrderPlacedEventDto eventData) = pairs ("eventType" .= ("OrderPlaced" :: Text) <> "eventData" .= eventData)
+    toEncoding (ShippableOrderPlacedEventDto eventData) = pairs ("eventType" .= ("ShippableOrderPlaced" :: Text) <> "eventData" .= eventData)

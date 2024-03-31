@@ -1,0 +1,2 @@
+{"eventType":"OrderPlaced","eventData":{"orderId":"c43f1827-2eb5-4fca-9976-7203ea7b0c0f","customerId":"1","orderLines":[{"productName":"\"Picard\"","quantity":"3","price":"59.97"}],"totalPrice":"59.97"}}
+{"eventType":"ShippableOrderPlaced","eventData":{"orderId":"c43f1827-2eb5-4fca-9976-7203ea7b0c0f","customerId":"1","orderLines":[{"productName":"\"Picard\"","quantity":"3"}],"shippingAddress":"\"Earth\""}}
