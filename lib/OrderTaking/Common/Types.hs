@@ -4,7 +4,6 @@ module OrderTaking.Common.Types (
     ProductQuantity,
     Address,
     Price,
-    createProductCode,
     createProductName,
     createProductQuantity,
     createAddress,
@@ -46,11 +45,6 @@ createProductName name =
     if not (T.null name)
         then Just (ProductName name)
         else Nothing
-
-createProductCode :: Text -> Maybe ProductCode
-createProductCode code
-    | T.null code || T.take 1 code /= "C" = Nothing
-    | otherwise = Just (ProductCode code)
 
 createProductQuantity :: Int -> Maybe ProductQuantity
 createProductQuantity quantity =

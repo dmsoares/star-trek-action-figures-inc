@@ -2,25 +2,39 @@
 
 # Star Trek Action Figures Inc.
 
-This repo was put together for a conversation about Functional Programming. 
-
-I hope it can serve has an example of a simple Haskell project for an audience that may not have had a lot of exposure to FP.
+This repo was put together for a informal talk about Functional Programming. 
 
 ## Functional Programming
+
 ### Functions all the way down
 > Programming as if functions truly matter
+
+![A call-graph showing how the impure, IO-performing part of the application is small](images/callgraph.png "Our Application Call Graph")
+
 ## Algebraic Data Types (ADTs)
+
 ### Sums
+
 ### Products
+
 ## Function composition
+
 ### Simple composition
+
 ### Effectful composition
+
 ### Chaining IO actions
+
 ## Haskell Syntax
+
 ### Function Application
+
 ### Currying
+
 ### `Do` notation
+
 ## Domain Modeling with FP
+
 ## Further reading
 
 ## Running the app

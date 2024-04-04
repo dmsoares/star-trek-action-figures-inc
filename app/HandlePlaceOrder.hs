@@ -1,4 +1,4 @@
-module HandlePlaceOrder (handlePlaceOrder) where
+module HandlePlaceOrder where
 
 import Data.Aeson.Decoding (decode)
 import Data.UUID (UUID)
@@ -30,7 +30,7 @@ handlePlaceOrder = do
             --  - apply the 'placeOrder' workflow to the unvalidated order
             --  - note how all IO (getting dependencies, generating a random UUID) is done outside the workflow
             --    and the 'placeOrder' function is pure
-            --
+
             let unvalidatedOrder = toUnvalidatedOrder newOrderId orderDto
             let result = placeOrder productMap unvalidatedOrder
 
