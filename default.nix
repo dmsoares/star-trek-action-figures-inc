@@ -1,5 +1,10 @@
 with import <nixpkgs> {};
 stdenv.mkDerivation {
     name = "dev-environment"; 
-    buildInputs = [ zlib haskellPackages.calligraphy graphviz ];
+    buildInputs =
+        [ zlib
+          haskellPackages.haskell-language-server
+          haskellPackages.calligraphy
+          graphviz
+        ];
 }

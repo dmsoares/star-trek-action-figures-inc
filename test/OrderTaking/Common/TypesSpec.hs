@@ -1,9 +1,9 @@
-module OrderTaking.Common.ValueObjectsSpec (spec) where
+module OrderTaking.Common.TypesSpec (spec) where
 
 import Data.Maybe (isJust, isNothing)
 import Data.Text qualified as T
 import Data.Text.Arbitrary ()
-import OrderTaking.Common.ValueObjects (createAddress, createProductQuantity)
+import OrderTaking.Common.Types (createAddress, createProductQuantity)
 import Test.Hspec (Spec, describe, it)
 import Test.QuickCheck (Testable (property))
 
