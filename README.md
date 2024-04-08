@@ -4,6 +4,8 @@
 
 This repo was put together for an informal talk about strongly typed functional programming. 
 
+It is a very simple web service with only one route: POST /order. It accepts an order of Star Trek action figures, and runs a `PlaceOrder` workflow that checks the validity of the order and publishes events for other hypothetical services to consume.
+
 ## Functional Programming
 
 ### Functions all the way down
