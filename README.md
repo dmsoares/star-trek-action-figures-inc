@@ -6,6 +6,27 @@ This repo was put together for an informal talk about strongly typed functional 
 
 It is a very simple web service with only one route: POST /order. It accepts an order of Star Trek action figures, and runs a `PlaceOrder` workflow that checks the validity of the order and publishes events for other hypothetical services to consume.
 
+Try running the server and make a request with this payload (see [here](#running-the-app) on how to run the server):
+
+```json
+{
+	"customerId": 1,
+	"orderLines": [
+		{
+			"productName": "Picard",
+			"quantity": 3
+		}
+	],
+	"shippingAddress": "Earth"
+}
+```
+
+For the different characters available, you can check the file `/db/products.txt`.
+
+
+
+TODO: right now, the only way to see anything happening is to check `/db/events.json` for new events. The server should probably respond to successful requests with the `OrderPlaced` event.
+
 ## Functional Programming
 
 ### Functions all the way down
