@@ -4,7 +4,9 @@
 
 This repo was put together for an informal talk about strongly typed functional programming. 
 
-It is a very simple web service with only one route: POST /order. It accepts an order of Star Trek action figures, and runs a `PlaceOrder` workflow that checks the validity of the order and publishes events for other hypothetical services to consume.
+Haskell is used as an elegant vehicle for communication of ideas. Unsurprisingly, it has the advantage that its syntax is particularly well suited for functional programming. __This is _not_ intended as a Haskell tutorial__ and many language details are simply brushed under the carpet, so to speak.
+
+This app is a very simple web service with only one route: POST /order. It accepts an order of Star Trek action figures, and runs a `PlaceOrder` workflow that checks the validity of the order and publishes events for other hypothetical services to consume.
 
 Try running the server and make a request with this payload (see [here](#running-the-app) on how to run the server):
 
@@ -34,9 +36,16 @@ TODO: right now, the only way to see anything happening is to check `/db/events.
 
 ![A call-graph showing how the impure, IO-performing part of the application is small](images/callgraph.png "Our Application Call Graph")
 
+For me, there are two main reasons why functional programming is important. 
+
+One is __modularity__, given by function composition in general and more specifically by higher-order functions, allows building big programs out of smaller ones, reusing and modifying components with a great degree of freedom, and tackle software complexity. John Hughes makes a stronger case than I ever will in his paper [Why Functional Programming Matters](https://www.cs.kent.ac.uk/people/staff/dat/miranda/whyfp90.pdf).
+
+The other is __expressiveness__. We have been both blessed and cursed by the Von Neumann computer. Blessed, because its contribution to the digital revolution is so immense. Cursed, because we seem to be forever bound to the imperative nature of what John Backus (in his [Turing Award Lecture](https://dl.acm.org/doi/pdf/10.1145/359576.359579)) calls the Von Neumann style of programming. In a word, languages relying on the assignment statement (from which other statements derive) force the programmer to entangle the computation they want to express in ceremony and bookkeeping. Functional programming, on the other hand, cares about immutability. This has rippling effects on expressiveness. In Haskell, for example, there are no statements, only expressions. Meaning, every well-formed string of source code can be evaluated to a value and bigger expressions can be composed of smaller expressions to form elegant programs that focus more on declaring _what_ and less on instructing _how_.
+
+
 ## Algebraic Data Types (ADTs)
 
-When building programs, we very often need to build data with some structure. Haskell let's us express structured, composable data with __Algebraic Data Types__. As we can see next, this powerful feature allows the developer to build big types out of small ones, like russian dolls or Lego, combining them at will in order to express sofisticated domains.
+When building programs, we very often need to build data with some structure. Haskell let's us express structured, composable data with __Algebraic Data Types__. As we can see next, this powerful feature allows the developer to build big types out of small ones, like Lego, combining them at will in order to declare sofisticated domains.
 
 We can see types as sets of values with a certain structure. We usually say a value _inhabits_ a given type if it belongs to the set of values of that type. For instance, the type `Bool` is inhabited by 2 values: `True` and `False`. We say the size of `Bool` is 2. The type `String` is inhabited by all possible sequences of characters, the type `Int32` by all signed integers representable with 32 bits, and so on.
 
@@ -120,7 +129,7 @@ We can have as many `Person` values as the possible combinations of `Name`, `Age
 
 #### Records
 
-In Haskell, __record types__ are not first class citizens. This has been a somewhat contentious topic, but some recent developments have made operating with records more ergonomic, although we won't go into much detail here.
+In Haskell, __records__ are not first class citizens. This has been a somewhat contentious topic, but some recent developments have made operating with records more ergonomic, although we won't go into detail here.
 
 In Haskell, a __record__ is just a product type with some syntactic sugar to allow named fields:
 
@@ -138,9 +147,49 @@ The `::` symbol translates to "_of type_". `name :: Name` reads "_name of type N
 
 ### Composing Types
 
+Now that we have Sums and Products we can create more complex types by combining them!
+
+```haskell
+data Role = Admin | Level0 | Level1
+
+data Email = UnvalidatedEmail String | ValidatedEmail String
+
+data User = User {
+	name  :: String,
+	role  :: Role
+	email :: Email
+}
+```
+
 ### Recursive Types
 
+Some data structures are recursive in the sense that its parts can have the same structure as the whole. A list is a good example. Another would be trees.
+
+```haskell
+data List a = Nil | Cons a (List a)
+
+myList :: List Int -- myList has type List Int
+myList = Cons 3 (Cons 2 (Cons 1 Nil))
+
+data Tree a = Leaf a | Branch (Tree a) (Tree a)
+
+myTree :: Tree String -- myTree has type Tree String
+myTree = Branch (Leaf "A") (Branch (Leaf "B") (Leaf "C"))
+```
+
 ### Pattern Matching
+
+As said before, every value carries a "birth mark", the mark of the data constructor that produced it. As long as the data constructor is in scope (just a detail for now, but something we will come back to), we can unpack a value, match on its constructor and extract the arguments that were once fed to it.
+
+```haskell
+data Maybe a = Nothing | Just a
+
+myFunc :: Maybe Int -> String
+myFunc mx = 
+	case mx of
+		Nothing -> "Nothing to see here!"
+		Just x  -> "The number is " <> show x
+```
 
 ## Function composition
 
