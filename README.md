@@ -4,9 +4,17 @@
 
 This repo was put together for an informal talk about strongly typed functional programming. 
 
-Haskell is used as an elegant vehicle for communication of ideas. Unsurprisingly, it has the advantage that its syntax is particularly well suited for functional programming. __This is _not_ intended as a Haskell tutorial__ and many language details are simply brushed under the carpet, so to speak.
+I'm using [Haskell, _an advanced, purely functional programming language_](https://www.haskell.org/) as an elegant vehicle for communication of ideas. Unsurprisingly, it has the advantage that its syntax is particularly well suited for functional programming. __This is _not_ intended as a Haskell tutorial__ and many language details are simply brushed under the carpet, so to speak.
+
+A couple of disclaimers:
+
+1. I assume the reader has been introduced to programming and functional programming in particular. I try to explain concepts as I go along, but there is a _lot_ of implicit knowledge here.
+2. I have no intentions of being original here. I'll do my best to attribute credit where it's due.
+
+## Trying the app
 
 This app is a very simple web service with only one route: POST /order. It accepts an order of Star Trek action figures, and runs a `PlaceOrder` workflow that checks the validity of the order and publishes events for other hypothetical services to consume.
+
 
 Try running the server and make a request with this payload (see [here](#running-the-app) on how to run the server):
 
@@ -25,23 +33,35 @@ Try running the server and make a request with this payload (see [here](#running
 
 For the different characters available, you can check the file `/db/products.txt`.
 
-
-
-TODO: right now, the only way to see anything happening is to check `/db/events.json` for new events. The server should probably respond to successful requests with the `OrderPlaced` event.
+A successful request will be answered with the events created, for demonstration purposes.
 
 ## Functional Programming
+
+### Why functional programming
+
+The allure of FP, to me, is threefold:
+
+1. __expressiveness__: it tries to __separate the meaning of a program from its implementation__. When this is achieved, the implementation can be optimized (be it at application or compiler level, for example) to different realities (e.g, parallelism) without changing the meaning of the program. Take the `map` function: "apply a function `f` to every value in a data structure `d`, leaving the structure intact" expresses meaning, but says nothing about _how_ to do it or what's the structure of `d` (is it a list, a tree or something else? If a list, should we do it from left-to-right, all-at-the-same-time or any other way?).
+2. __tackles complexity through modularity__: given by laziness and function composition in general and more specifically by higher-order functions, modularity allows building big programs out of smaller ones, reusing and modifying components with a high degree of freedom. John Hughes makes a stronger case than I ever will in his paper [Why Functional Programming Matters](https://www.cs.kent.ac.uk/people/staff/dat/miranda/whyfp90.pdf).
+3. __correctness__: this can be controversial, but I always feel software correctness is at the heart of most discussions around FP (in particularly in Haskell and other languages gravitating around it) in a way I just don't see in other ecosystems. Be it via testing, FP introduced [property-based testing](https://begriffs.com/posts/2017-01-14-design-use-quickcheck.html), or via _correctness-by-construction_: Haskell's type-system is one of the most rich of industry-grade languages and has been like that since its beginning, and new languages like [Agda](https://agda.readthedocs.io/en/latest/getting-started/what-is-agda.html) are breaking new ground with regards to type-safety.
+
+The discussion around programming styles is surely an old one. I always suggest reading John Backus' 1977 Turing Award Lecture [_Can Programming Be Liberated from the von Neumann Style?_](https://dl.acm.org/doi/pdf/10.1145/359576.359579) for putting modern languages in perspective.
 
 ### Functions all the way down
 > Programming as if functions truly matter. (Scott Wlaschin, author of _Domain Modeling Made Functional_)
 
-![A call-graph showing how the impure, IO-performing part of the application is small](images/callgraph.png "Our Application Call Graph")
+![A call graph showing how the impure, IO-performing part of the application is small](images/callgraph.png "Our Application Call Graph")
 
-For me, there are two main reasons why functional programming is important. 
+The picture above is a call graph of our web service. Call graphs are a very useful tool to assess the architecture of an application as it lets us see the flow of function calls.
 
-One is __modularity__, given by function composition in general and more specifically by higher-order functions, allows building big programs out of smaller ones, reusing and modifying components with a great degree of freedom, and tackle software complexity. John Hughes makes a stronger case than I ever will in his paper [Why Functional Programming Matters](https://www.cs.kent.ac.uk/people/staff/dat/miranda/whyfp90.pdf).
+We can distinguish three categories of objects in the call graph above:
+- in blue (or is it green?), we have the functions pertaining to the `PlaceOrder` workflow. These are all pure functions combined into the `placeOrder` function. This function sequences `validateOrder`, `priceOrder` and `createEvents`, piping through them the incoming `order` request.  
+- in light pink, we have some peripheric functions (no less important for that), such as DTO or HTTP error response constructors. These are not part of our core logic, but work at the edges of our domain. All of them are pure functions.
+- finally, in orange, we perform IO to fetch dependencies, generate random ids, save events, and return an HTTP response back, among other things. 
 
-The other is __expressiveness__. We have been both blessed and cursed by the Von Neumann computer. Blessed, because its contribution to the digital revolution is so immense. Cursed, because we seem to be forever bound to the imperative nature of what John Backus (in his [Turing Award Lecture](https://dl.acm.org/doi/pdf/10.1145/359576.359579)) calls the Von Neumann style of programming. In a word, languages relying on the assignment statement (from which other statements derive) force the programmer to entangle the computation they want to express in ceremony and bookkeeping. Functional programming, on the other hand, cares about immutability. This has rippling effects on expressiveness. In Haskell, for example, there are no statements, only expressions. Meaning, every well-formed string of source code can be evaluated to a value and bigger expressions can be composed of smaller expressions to form elegant programs that focus more on declaring _what_ and less on instructing _how_.
-
+There are two very important things to note here:
+1. __just a small, outer part of our application actually performs IO__. Importantly, all our domain logic is pure.
+2. __IO is insidious__. `pushEvents` is colored in orange, but the call to the DB is done in `saveEvents`. Any region of our call graph depending on impure code is itself impure: if `saveEvents` is impure, so are `pushEvents`, `handlePlaceOrder` and `main`. 
 
 ## Algebraic Data Types (ADTs)
 
@@ -198,6 +218,8 @@ myFunc mx =
 ### Effectful composition
 
 ### Chaining IO actions
+
+Let's go back to the [call graph](#functions-all-the-way-down) for our web service. The orange ovals is where IO is being performed. Those seem like functions, but they're really not: they're __Actions__. Haskell is _purely functional_, meaning, all functions are pure. So, if those were functions, someone would be lying here, and we don't want that. IO actions are computed by pure functions and all you can do with an action is producing a new action from its output, or, if its output is of no interest, just sequencing it with another action!
 
 ## Haskell Syntax
 
