@@ -55,7 +55,7 @@ common base
     ghc-options: -Wall
     build-depends:    base,
     default-language: GHC2021
-    default-extensions: OverloadedStrings, DuplicateRecordFields
+    default-extensions: OverloadedStrings, DuplicateRecordFields, LambdaCase
 
 executable star-trek-action-figures-inc
     -- Import common warning flags.
@@ -66,7 +66,7 @@ executable star-trek-action-figures-inc
 
     -- Modules included in this executable, other than Main.
     other-modules:    HttpUtils,
-                      HandlePlaceOrder  
+                      HandlePlaceOrder
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -113,6 +113,7 @@ library order-taking
                       bytestring,
                       containers,
                       http-types,
+                      mtl,
                       scotty,
                       strict,
                       text,
@@ -124,12 +125,13 @@ test-suite spec
     type: exitcode-stdio-1.0
     hs-source-dirs: test
     main-is: Spec.hs
-    build-depends:  
+    build-depends:
         order-taking,
         hspec,
         QuickCheck,
         quickcheck-text,
         text
-    other-modules: 
+    other-modules:
         OrderTaking.Common.ValueObjectsSpec
+        OrderTaking.Common.TypesSpec
     build-tool-depends: hspec-discover:hspec-discover == 2.*
